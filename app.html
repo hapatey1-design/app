@@ -1,10 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Телеграм Mini App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e1e;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+        }
+        
+        #game-screen {
+            width: 100%;
+            height: 70vh;
+            background-color: #333;
+            position: relative;
+        }
+        
+        #player {
+            width: 30px;
+            height: 30px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        #joystick {
+            width: 80px;
+            height: 80px;
+            background-color: rgba(100, 100, 100, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            bottom: 100px;
+            left: 50px;
+            touch-action: none;
+        }
+        
+        #joystick-knob {
+            width: 30px;
+            height: 30px;
+            background-color: #2196F3;
+            border-radius: 50%;
+            position: absolute;
+            top: 25px;
+            left: 25px;
+        }
+        
+        #inventory {
+            display: flex;
+            gap: 10px;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .inventory-slot {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(100, 100, 100, 0.7);
+            border: 1px solid #555;
+            border-radius: 5px;
+        }
+        
+        #stats {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Привет!</h1>
-</body>
-</html>
+    <div id="game-screen">
+        <div id="player"></div>
+    </div>
+    
+    <div id="joystick">
+        <div id="joystick-knob"></div>
+    </div>
+    
+    <div id="inventory">
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+    </div>
+    
+    <div id="stats">
+        <div>Здоровье: <span id="health">100</span></div>
+        <div>Голод: <span id="hunger">50</span></div>
+        <div>Уровень: <span id="level">1</span></div>
+        <div>Ник: <span id="username">Player</span></div>
+    </div>
+    
+    <script>
+        // Телеграм WebApp API
+        const tg = window.Telegram.WebApp;
+        
+        // Получаем данные пользователя
+        document.getElementById("username").textContent = tg.initDataUnsafe.user?.first_name || "Player";
+        
+        // Джойстик
+        const joystick = document.getElementById("joystick");
+        const knob
