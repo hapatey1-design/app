@@ -70,6 +70,22 @@
             border: 1px solid #555;
             border-radius: 5px;
         }
+        const inventorySlots = document.querySelectorAll(".inventory-slot");
+
+inventorySlots.forEach((slot, index) => {
+    slot.addEventListener("click", () => {
+        alert(`Выбран слот ${index + 1}`);
+        // Можно добавить логику использования предмета
+    });
+});
+
+// Пример добавления предмета в инвентарь
+function addItemToInventory(item, slotIndex) {
+    if (slotIndex >= 0 && slotIndex < inventorySlots.length) {
+        inventorySlots[slotIndex].textContent = item;
+        inventorySlots[slotIndex].style.backgroundColor = "#4CAF50";
+    }
+}
         
         #stats {
             position: fixed;
@@ -114,4 +130,153 @@
         
         // Джойстик
         const joystick = document.getElementById("joystick");
-        const knob
+const knob = document.getElementById("joystick-knob");
+const player = document.getElementById("player");
+
+let isJoystickActive = false;
+let joystickCenter = { x: 0, y: 0 };
+let playerPos = { x: 50, y: 50 };
+const playerSpeed = 5;
+
+// Начальные координаты джойстика
+joystickCenter.x = joystick.offsetLeft + joystick.offsetWidth / 2;
+joystickCenter.y = joystick.offsetTop + joystick.offsetHeight / 2;
+
+// Обработка касаний/мыши
+joystick.addEventListener("mousedown", handleJoystickStart);
+joystick.addEventListener("touchstart", handleJoystickStart);
+
+document.addEventListener("mousemove", handleJoystickMove);
+document.addEventListener("touchmove", handleJoystickMove);
+
+document.addEventListener("mouseup", handleJoystickEnd);
+document.addEventListener("touchend", handleJoystickEnd);
+
+function handleJoystickStart(e) {
+    isJoystickActive = true;
+    e.preventDefault();
+}
+
+function handleJoystickMove(e) {
+    if (!isJoystickActive) return;
+
+    let clientX, clientY;
+
+    if (e.type === "mousemove") {
+        clientX = e.clientX;
+        clientY = e.clientY;
+    } else {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    }
+
+    // Ограничиваем движение джойстика
+    const deltaX = clientX - joystickCenter.x;
+    const deltaY = clientY - joystickCenter.y;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const maxDistance = 40;
+
+    if (distance > maxDistance) {
+        const angle = Math.atan2(deltaY, deltaX);
+        knob.style.left = `${Math.cos(angle) * maxDistance}px`;
+        knob.style.top = `${Math.sin(angle) * maxDistance}px`;
+    } else {
+        knob.style.left = `${deltaX}px`;
+        knob.style.top = `${deltaY}px`;
+    }
+
+    // Двигаем персонажа
+    const moveX = deltaX / maxDistance * playerSpeed;
+    const moveY = deltaY / maxDistance * playerSpeed;
+
+    playerPos.x += moveX;
+    playerPos.y += moveY;
+
+    // Ограничиваем границы экрана
+    playerPos.x = Math.max(0, Math.min(playerPos.x, window.innerWidth - 30));
+    playerPos.y = Math.max(0, Math.min(playerPos.y, window.innerHeight - 30));
+
+    player.style.left = `${playerPos.x}px`;
+    player.style.top = `${playerPos.y}px`;
+}
+
+function handleJoystickEnd() {
+    isJoystickActive = false;
+    knob.style.left = "25px";
+    knob.style.top = "25px";
+}const joystick = document.getElementById("joystick");
+const knob = document.getElementById("joystick-knob");
+const player = document.getElementById("player");
+
+let isJoystickActive = false;
+let joystickCenter = { x: 0, y: 0 };
+let playerPos = { x: 50, y: 50 };
+const playerSpeed = 5;
+
+// Начальные координаты джойстика
+joystickCenter.x = joystick.offsetLeft + joystick.offsetWidth / 2;
+joystickCenter.y = joystick.offsetTop + joystick.offsetHeight / 2;
+
+// Обработка касаний/мыши
+joystick.addEventListener("mousedown", handleJoystickStart);
+joystick.addEventListener("touchstart", handleJoystickStart);
+
+document.addEventListener("mousemove", handleJoystickMove);
+document.addEventListener("touchmove", handleJoystickMove);
+
+document.addEventListener("mouseup", handleJoystickEnd);
+document.addEventListener("touchend", handleJoystickEnd);
+
+function handleJoystickStart(e) {
+    isJoystickActive = true;
+    e.preventDefault();
+}
+
+function handleJoystickMove(e) {
+    if (!isJoystickActive) return;
+
+    let clientX, clientY;
+
+    if (e.type === "mousemove") {
+        clientX = e.clientX;
+        clientY = e.clientY;
+    } else {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    }
+
+    // Ограничиваем движение джойстика
+    const deltaX = clientX - joystickCenter.x;
+    const deltaY = clientY - joystickCenter.y;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const maxDistance = 40;
+
+    if (distance > maxDistance) {
+        const angle = Math.atan2(deltaY, deltaX);
+        knob.style.left = `${Math.cos(angle) * maxDistance}px`;
+        knob.style.top = `${Math.sin(angle) * maxDistance}px`;
+    } else {
+        knob.style.left = `${deltaX}px`;
+        knob.style.top = `${deltaY}px`;
+    }
+
+    // Двигаем персонажа
+    const moveX = deltaX / maxDistance * playerSpeed;
+    const moveY = deltaY / maxDistance * playerSpeed;
+
+    playerPos.x += moveX;
+    playerPos.y += moveY;
+
+    // Ограничиваем границы экрана
+    playerPos.x = Math.max(0, Math.min(playerPos.x, window.innerWidth - 30));
+    playerPos.y = Math.max(0, Math.min(playerPos.y, window.innerHeight - 30));
+
+    player.style.left = `${playerPos.x}px`;
+    player.style.top = `${playerPos.y}px`;
+}
+
+function handleJoystickEnd() {
+    isJoystickActive = false;
+    knob.style.left = "25px";
+    knob.style.top = "25px";
+}
