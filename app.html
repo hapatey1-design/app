@@ -1,282 +1,160 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Телеграм Mini App</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini RPG Game</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            background-color: #1e1e1e;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
             color: white;
-            font-family: Arial, sans-serif;
             overflow: hidden;
-            touch-action: none;
+            width: 100vw;
+            height: 100vh;
         }
-        
-        #game-screen {
-            width: 100%;
-            height: 70vh;
-            background-color: #333;
+
+        #game-container {
             position: relative;
+            width: 100%;
+            height: 100%;
         }
-        
+
+        #game-world {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70%;
+            background-color: #2d2d2d;
+            overflow: hidden;
+        }
+
         #player {
-            width: 30px;
-            height: 30px;
+            position: absolute;
+            width: 32px;
+            height: 32px;
             background-color: #4CAF50;
             border-radius: 50%;
+            border: 2px solid #388E3C;
+            z-index: 10;
+            transition: transform 0.1s ease;
+        }
+
+        .tree {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 60px;
+            background-color: #2E7D32;
+            border-radius: 20px 20px 0 0;
         }
-        
-        #joystick {
-            width: 80px;
-            height: 80px;
-            background-color: rgba(100, 100, 100, 0.5);
-            border-radius: 50%;
-            position: fixed;
-            bottom: 100px;
-            left: 50px;
-            touch-action: none;
-        }
-        
-        #joystick-knob {
+
+        .rock {
+            position: absolute;
             width: 30px;
             height: 30px;
-            background-color: #2196F3;
+            background-color: #616161;
             border-radius: 50%;
+        }
+
+        #ui-container {
             position: absolute;
-            top: 25px;
-            left: 25px;
-        }
-        
-        #inventory {
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background-color: #121212;
             display: flex;
-            gap: 10px;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            flex-direction: column;
+            padding: 10px;
         }
-        
-        .inventory-slot {
+
+        #stats-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .stat-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border-radius: 50%;
+        }
+
+        #health .stat-icon { background-color: #f44336; }
+        #hunger .stat-icon { background-color: #FF9800; }
+        #energy .stat-icon { background-color: #2196F3; }
+        #level .stat-icon { background-color: #9C27B0; }
+
+        #joystick-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-left: 20px;
+        }
+
+        #joystick-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(100, 100, 100, 0.5);
+            border-radius: 50%;
+        }
+
+        #joystick-handle {
+            position: absolute;
             width: 40px;
             height: 40px;
-            background-color: rgba(100, 100, 100, 0.7);
-            border: 1px solid #555;
-            border-radius: 5px;
+            background-color: rgba(33, 150, 243, 0.8);
+            border-radius: 50%;
+            top: 30px;
+            left: 30px;
+            transition: transform 0.1s ease;
         }
-        const inventorySlots = document.querySelectorAll(".inventory-slot");
 
-inventorySlots.forEach((slot, index) => {
-    slot.addEventListener("click", () => {
-        alert(`Выбран слот ${index + 1}`);
-        // Можно добавить логику использования предмета
-    });
-});
-
-// Пример добавления предмета в инвентарь
-function addItemToInventory(item, slotIndex) {
-    if (slotIndex >= 0 && slotIndex < inventorySlots.length) {
-        inventorySlots[slotIndex].textContent = item;
-        inventorySlots[slotIndex].style.backgroundColor = "#4CAF50";
-    }
-}
-        
-        #stats {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 5px;
+        #action-buttons {
+            position: absolute;
+            right: 20px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-    </style>
-</head>
-<body>
-    <div id="game-screen">
-        <div id="player"></div>
-    </div>
-    
-    <div id="joystick">
-        <div id="joystick-knob"></div>
-    </div>
-    
-    <div id="inventory">
-        <div class="inventory-slot"></div>
-        <div class="inventory-slot"></div>
-        <div class="inventory-slot"></div>
-        <div class="inventory-slot"></div>
-        <div class="inventory-slot"></div>
-    </div>
-    
-    <div id="stats">
-        <div>Здоровье: <span id="health">100</span></div>
-        <div>Голод: <span id="hunger">50</span></div>
-        <div>Уровень: <span id="level">1</span></div>
-        <div>Ник: <span id="username">Player</span></div>
-    </div>
-    
-    <script>
-        // Телеграм WebApp API
-        const tg = window.Telegram.WebApp;
-        
-        // Получаем данные пользователя
-        document.getElementById("username").textContent = tg.initDataUnsafe.user?.first_name || "Player";
-        
-        // Джойстик
-        const joystick = document.getElementById("joystick");
-const knob = document.getElementById("joystick-knob");
-const player = document.getElementById("player");
 
-let isJoystickActive = false;
-let joystickCenter = { x: 0, y: 0 };
-let playerPos = { x: 50, y: 50 };
-const playerSpeed = 5;
+        .action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: rgba(76, 175, 80, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
 
-// Начальные координаты джойстика
-joystickCenter.x = joystick.offsetLeft + joystick.offsetWidth / 2;
-joystickCenter.y = joystick.offsetTop + joystick.offsetHeight / 2;
-
-// Обработка касаний/мыши
-joystick.addEventListener("mousedown", handleJoystickStart);
-joystick.addEventListener("touchstart", handleJoystickStart);
-
-document.addEventListener("mousemove", handleJoystickMove);
-document.addEventListener("touchmove", handleJoystickMove);
-
-document.addEventListener("mouseup", handleJoystickEnd);
-document.addEventListener("touchend", handleJoystickEnd);
-
-function handleJoystickStart(e) {
-    isJoystickActive = true;
-    e.preventDefault();
-}
-
-function handleJoystickMove(e) {
-    if (!isJoystickActive) return;
-
-    let clientX, clientY;
-
-    if (e.type === "mousemove") {
-        clientX = e.clientX;
-        clientY = e.clientY;
-    } else {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-    }
-
-    // Ограничиваем движение джойстика
-    const deltaX = clientX - joystickCenter.x;
-    const deltaY = clientY - joystickCenter.y;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const maxDistance = 40;
-
-    if (distance > maxDistance) {
-        const angle = Math.atan2(deltaY, deltaX);
-        knob.style.left = `${Math.cos(angle) * maxDistance}px`;
-        knob.style.top = `${Math.sin(angle) * maxDistance}px`;
-    } else {
-        knob.style.left = `${deltaX}px`;
-        knob.style.top = `${deltaY}px`;
-    }
-
-    // Двигаем персонажа
-    const moveX = deltaX / maxDistance * playerSpeed;
-    const moveY = deltaY / maxDistance * playerSpeed;
-
-    playerPos.x += moveX;
-    playerPos.y += moveY;
-
-    // Ограничиваем границы экрана
-    playerPos.x = Math.max(0, Math.min(playerPos.x, window.innerWidth - 30));
-    playerPos.y = Math.max(0, Math.min(playerPos.y, window.innerHeight - 30));
-
-    player.style.left = `${playerPos.x}px`;
-    player.style.top = `${playerPos.y}px`;
-}
-
-function handleJoystickEnd() {
-    isJoystickActive = false;
-    knob.style.left = "25px";
-    knob.style.top = "25px";
-}const joystick = document.getElementById("joystick");
-const knob = document.getElementById("joystick-knob");
-const player = document.getElementById("player");
-
-let isJoystickActive = false;
-let joystickCenter = { x: 0, y: 0 };
-let playerPos = { x: 50, y: 50 };
-const playerSpeed = 5;
-
-// Начальные координаты джойстика
-joystickCenter.x = joystick.offsetLeft + joystick.offsetWidth / 2;
-joystickCenter.y = joystick.offsetTop + joystick.offsetHeight / 2;
-
-// Обработка касаний/мыши
-joystick.addEventListener("mousedown", handleJoystickStart);
-joystick.addEventListener("touchstart", handleJoystickStart);
-
-document.addEventListener("mousemove", handleJoystickMove);
-document.addEventListener("touchmove", handleJoystickMove);
-
-document.addEventListener("mouseup", handleJoystickEnd);
-document.addEventListener("touchend", handleJoystickEnd);
-
-function handleJoystickStart(e) {
-    isJoystickActive = true;
-    e.preventDefault();
-}
-
-function handleJoystickMove(e) {
-    if (!isJoystickActive) return;
-
-    let clientX, clientY;
-
-    if (e.type === "mousemove") {
-        clientX = e.clientX;
-        clientY = e.clientY;
-    } else {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-    }
-
-    // Ограничиваем движение джойстика
-    const deltaX = clientX - joystickCenter.x;
-    const deltaY = clientY - joystickCenter.y;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const maxDistance = 40;
-
-    if (distance > maxDistance) {
-        const angle = Math.atan2(deltaY, deltaX);
-        knob.style.left = `${Math.cos(angle) * maxDistance}px`;
-        knob.style.top = `${Math.sin(angle) * maxDistance}px`;
-    } else {
-        knob.style.left = `${deltaX}px`;
-        knob.style.top = `${deltaY}px`;
-    }
-
-    // Двигаем персонажа
-    const moveX = deltaX / maxDistance * playerSpeed;
-    const moveY = deltaY / maxDistance * playerSpeed;
-
-    playerPos.x += moveX;
-    playerPos.y += moveY;
-
-    // Ограничиваем границы экрана
-    playerPos.x = Math.max(0, Math.min(playerPos.x, window.innerWidth - 30));
-    playerPos.y = Math.max(0, Math.min(playerPos.y, window.innerHeight - 30));
-
-    player.style.left = `${playerPos.x}px`;
-    player.style.top = `${playerPos.y}px`;
-}
-
-function handleJoystickEnd() {
-    isJoystickActive = false;
-    knob.style.left = "25px";
-    knob.style.top = "25px";
-}
+        #inventory {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: auto;
